@@ -1,7 +1,11 @@
 name: Publish Release
-# Autonomous: pulls the weekly community artifact from S3 (published by
-# topcoder1/ipgeo_core community-build.yml) and cuts a GitHub Release. No
-# laptop or subscription involved.
+# Autonomous: pulls the weekly community artifact from S3 (published by the
+# private topcoder1/ipgeo_core community-build.yml) and cuts a GitHub Release.
+# The publish is SELF-VERIFYING — it refuses to release an artifact that carries
+# any commercial (Panavision) column, so an unattended run cannot leak the
+# commercial edge even if the build regresses. (VPN/proxy flags are recomputed
+# from native ASN detection in the build, so no per-row provenance check is
+# needed here — the column check is the provenance-independent invariant.)
 on:
   schedule:
     - cron: "30 6 * * 1" # Mondays 06:30 UTC, after the S3 build at 05:30
@@ -23,12 +27,30 @@ jobs:
           pip install awscli >/dev/null
           aws s3 sync "s3://${{ secrets.S3_BUCKET }}/community/latest/" dist/ --quiet
           test -f dist/ipgeo-community.mmdb || { echo "::error::no MMDB in S3"; exit 1; }
-          VERSION=$(python3 -c "import json;print(json.load(open('dist/MANIFEST.json'))['version'])")
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          test -f dist/MANIFEST.json || { echo "::error::no MANIFEST"; exit 1; }
+      - name: Verify artifact boundary (fail-closed — no commercial leak)
+        run: |
+          python3 - <<'PY'
+          import csv, gzip
+          COMMERCIAL = {"observed_country","observed_countries","observed_lat",
+                        "observed_lon","confidence","source"}
+          with gzip.open("dist/ipgeo-community.csv.gz","rt") as f:
+              header = next(csv.reader(f))
+          bad = COMMERCIAL & set(header)
+          assert not bad, f"commercial columns present in community artifact: {bad}"
+          # Fail closed unless a native-recompute build produced this artifact —
+          # an older/leaky build lacks the marker and must NOT publish.
+          import json
+          man = json.load(open("dist/MANIFEST.json"))
+          assert man.get("flag_provenance") == "native-asn-recomputed", \
+              f"artifact not produced by a native-recompute build: {man.get('flag_provenance')!r}"
+          print("artifact boundary OK: no commercial columns; flags native-ASN-recomputed")
+          PY
       - name: Cut release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          VERSION=$(python3 -c "import json;print(json.load(open('dist/MANIFEST.json'))['version'])")
           TAG="community-${VERSION}"
           if gh release view "$TAG" >/dev/null 2>&1; then echo "release $TAG exists"; exit 0; fi
           gh release create "$TAG" dist/* \
