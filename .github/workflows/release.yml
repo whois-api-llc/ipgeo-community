@@ -1,0 +1,36 @@
+name: Publish Release
+# Autonomous: pulls the weekly community artifact from S3 (published by
+# topcoder1/ipgeo_core community-build.yml) and cuts a GitHub Release. No
+# laptop or subscription involved.
+on:
+  schedule:
+    - cron: "30 6 * * 1" # Mondays 06:30 UTC, after the S3 build at 05:30
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Pull artifact from S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          pip install awscli >/dev/null
+          aws s3 sync "s3://${{ secrets.S3_BUCKET }}/community/latest/" dist/ --quiet
+          test -f dist/ipgeo-community.mmdb || { echo "::error::no MMDB in S3"; exit 1; }
+          VERSION=$(python3 -c "import json;print(json.load(open('dist/MANIFEST.json'))['version'])")
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+      - name: Cut release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="community-${VERSION}"
+          if gh release view "$TAG" >/dev/null 2>&1; then echo "release $TAG exists"; exit 0; fi
+          gh release create "$TAG" dist/* \
+            --title "ipgeo Community Edition — $VERSION" \
+            --notes "Free IP geolocation DB (CC BY-SA 4.0). See MANIFEST.json for checksums."
