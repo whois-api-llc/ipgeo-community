@@ -7,8 +7,8 @@ body:
     attributes:
       value: |
         Thanks — corrections make the database better for everyone. Two things first:
-        - Check the [latest weekly release](../../releases/latest); data refreshes every Monday.
-        - Read the ["My IP is located wrong"](../../blob/main/SUPPORT.md) notes: city/coords are
+        - Check the [latest weekly release](https://github.com/whois-api-llc/ipgeo-community/releases/latest); data refreshes every Monday.
+        - Read the ["My IP is located wrong"](https://github.com/whois-api-llc/ipgeo-community/blob/main/SUPPORT.md) notes: city/coords are
           approximate by nature, and VPN/datacenter flags are **range/provider-level by design**.
         Accepted fixes ship in a future Monday release (no hotfixes; **no SLA**).
   - type: input

@@ -44,7 +44,7 @@ mis-typed `ip_type`). Those corrections are welcome via the same template.
 ## Commercial / production needs
 
 Per-IP precision, daily updates, confidence scores, and supported SLAs are
-the commercial tier — [WhoisXML / Panavision](<COMMERCIAL_URL>?utm_source=ipgeo-community&utm_medium=docs&utm_campaign=community-launch&utm_content=support).
+the commercial tier — [WhoisXML / Panavision](https://www.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=docs&utm_campaign=community-launch&utm_content=support).
 Sales and licensing questions belong there, not in the issue tracker.
 
 ## Security

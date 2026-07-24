@@ -6,9 +6,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Quick answers live in the [README](../../blob/main/README.md),
-        [SCHEMA.md](../../blob/main/SCHEMA.md), and the
-        [SUPPORT.md FAQ](../../blob/main/SUPPORT.md#faq). Commercial/sales questions:
+        Quick answers live in the [README](https://github.com/whois-api-llc/ipgeo-community/blob/main/README.md),
+        [SCHEMA.md](https://github.com/whois-api-llc/ipgeo-community/blob/main/SCHEMA.md), and the
+        [SUPPORT.md FAQ](https://github.com/whois-api-llc/ipgeo-community/blob/main/SUPPORT.md#faq). Commercial/sales questions:
         see the contact link on the issue chooser instead. Best-effort answers, **no SLA**.
   - type: checkboxes
     id: checked
