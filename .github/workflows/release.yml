@@ -28,7 +28,7 @@ jobs:
           aws s3 sync "s3://${{ secrets.S3_BUCKET }}/community/latest/" dist/ --quiet
           test -f dist/ipgeo-community.mmdb || { echo "::error::no MMDB in S3"; exit 1; }
           test -f dist/MANIFEST.json || { echo "::error::no MANIFEST"; exit 1; }
-      - name: Verify artifact boundary (fail-closed — no commercial leak)
+      - name: Verify artifact boundary, freshness, checksums (fail-closed)
         run: |
           python3 - <<'PY'
           import csv, gzip
@@ -44,7 +44,35 @@ jobs:
           man = json.load(open("dist/MANIFEST.json"))
           assert man.get("flag_provenance") == "native-asn-recomputed", \
               f"artifact not produced by a native-recompute build: {man.get('flag_provenance')!r}"
-          print("artifact boundary OK: no commercial columns; flags native-ASN-recomputed")
+          # Freshness (audit MEDIUM-4): the S3 sync is non-atomic and this job
+          # runs unattended — refuse to release a stale/partial latest/ bundle.
+          import datetime
+          v = man["version"]
+          age = (datetime.date.today() - datetime.date.fromisoformat(v)).days
+          assert 0 <= age <= 6, \
+              f"MANIFEST version {v} is {age} days old — stale S3 artifact, refusing to release"
+          # Checksums (audit MEDIUM-5): every manifest-listed file must
+          # hash-match what ships (CSV checksums cover decompressed content).
+          import hashlib, pathlib
+          def _sha(f):
+              h = hashlib.sha256()
+              for chunk in iter(lambda: f.read(1 << 20), b""):
+                  h.update(chunk)
+              return h.hexdigest()
+          for name, meta in man["files"].items():
+              p = pathlib.Path("dist") / name
+              gz = pathlib.Path("dist") / (name + ".gz")
+              if p.exists():
+                  with open(p, "rb") as f:
+                      got = _sha(f)
+              elif gz.exists():
+                  with gzip.open(gz, "rb") as f:
+                      got = _sha(f)
+              else:
+                  raise SystemExit(f"manifest lists {name} but neither it nor {gz.name} is in dist/")
+              assert got == meta["sha256"], \
+                  f"checksum mismatch for {name}: manifest {meta['sha256'][:12]}… != actual {got[:12]}…"
+          print(f"boundary OK; freshness OK ({v}, {age}d); all {len(man['files'])} checksums verified")
           PY
       - name: Cut release
         env:
