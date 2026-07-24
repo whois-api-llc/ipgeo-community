@@ -8,7 +8,10 @@ name: Publish Release
 # needed here — the column check is the provenance-independent invariant.)
 on:
   schedule:
-    - cron: "30 6 * * 1" # Mondays 06:30 UTC, after the S3 build at 05:30
+    # Mondays 08:30 UTC. The build starts 05:30 with timeout-minutes: 60 on a
+    # shared self-hosted runner, so 06:30 left zero margin — a queued or slow
+    # build would trip the freshness gate and lose the week's release.
+    - cron: "30 8 * * 1"
   workflow_dispatch:
 permissions:
   contents: write
@@ -48,31 +51,51 @@ jobs:
           # runs unattended — refuse to release a stale/partial latest/ bundle.
           import datetime
           v = man["version"]
-          age = (datetime.date.today() - datetime.date.fromisoformat(v)).days
-          assert 0 <= age <= 6, \
-              f"MANIFEST version {v} is {age} days old — stale S3 artifact, refusing to release"
+          try:
+              built = datetime.date.fromisoformat(v)
+          except ValueError:
+              raise SystemExit(f"::error::MANIFEST version {v!r} is not YYYY-MM-DD — refusing to release")
+          age = (datetime.date.today() - built).days
+          if age > 6:
+              raise SystemExit(
+                  f"::error::MANIFEST version {v} is {age} days old — the weekly build did not "
+                  "publish a fresh artifact; refusing to release a stale bundle")
+          if age < 0:
+              raise SystemExit(
+                  f"::error::MANIFEST version {v} is dated {-age} day(s) in the future — "
+                  "clock skew or a hand-edited manifest; refusing to release")
           # Checksums (audit MEDIUM-5): every manifest-listed file must
           # hash-match what ships (CSV checksums cover decompressed content).
+          # Coverage first — an empty/partial files map must not pass as "all verified".
           import hashlib, pathlib
+          REQUIRED = {"ipgeo-community.mmdb", "ipgeo-community.csv"}
+          files = man.get("files") or {}
+          missing_req = REQUIRED - set(files)
+          assert not missing_req, f"manifest omits required data files: {sorted(missing_req)}"
           def _sha(f):
               h = hashlib.sha256()
               for chunk in iter(lambda: f.read(1 << 20), b""):
                   h.update(chunk)
               return h.hexdigest()
-          for name, meta in man["files"].items():
+          for name, meta in files.items():
+              sha = (meta or {}).get("sha256")
+              assert sha, f"manifest entry for {name} has no sha256"
               p = pathlib.Path("dist") / name
               gz = pathlib.Path("dist") / (name + ".gz")
-              if p.exists():
-                  with open(p, "rb") as f:
+              # Verify EVERY shipped variant: `gh release create dist/*` publishes
+              # whatever is present, so checking only one of them can ship the other
+              # unverified.
+              checked = 0
+              for path, opener in ((gz, gzip.open), (p, open)):
+                  if not path.exists():
+                      continue
+                  with opener(path, "rb") as f:
                       got = _sha(f)
-              elif gz.exists():
-                  with gzip.open(gz, "rb") as f:
-                      got = _sha(f)
-              else:
-                  raise SystemExit(f"manifest lists {name} but neither it nor {gz.name} is in dist/")
-              assert got == meta["sha256"], \
-                  f"checksum mismatch for {name}: manifest {meta['sha256'][:12]}… != actual {got[:12]}…"
-          print(f"boundary OK; freshness OK ({v}, {age}d); all {len(man['files'])} checksums verified")
+                  assert got == sha, \
+                      f"checksum mismatch for {path.name}: manifest {sha[:12]}… != actual {got[:12]}…"
+                  checked += 1
+              assert checked, f"manifest lists {name} but neither it nor {gz.name} is in dist/"
+          print(f"boundary OK; freshness OK ({v}, {age}d); all {len(files)} manifest entries verified")
           PY
       - name: Cut release
         env:
