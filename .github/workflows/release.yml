@@ -8,7 +8,10 @@ name: Publish Release
 # needed here — the column check is the provenance-independent invariant.)
 on:
   schedule:
-    - cron: "30 6 * * 1" # Mondays 06:30 UTC, after the S3 build at 05:30
+    # Mondays 08:30 UTC. The build starts 05:30 with timeout-minutes: 60 on a
+    # shared self-hosted runner, so 06:30 left zero margin — a queued or slow
+    # build would trip the freshness gate and lose the week's release.
+    - cron: "30 8 * * 1"
   workflow_dispatch:
 permissions:
   contents: write
@@ -28,7 +31,7 @@ jobs:
           aws s3 sync "s3://${{ secrets.S3_BUCKET }}/community/latest/" dist/ --quiet
           test -f dist/ipgeo-community.mmdb || { echo "::error::no MMDB in S3"; exit 1; }
           test -f dist/MANIFEST.json || { echo "::error::no MANIFEST"; exit 1; }
-      - name: Verify artifact boundary (fail-closed — no commercial leak)
+      - name: Verify artifact boundary, freshness, checksums (fail-closed)
         run: |
           python3 - <<'PY'
           import csv, gzip
@@ -44,7 +47,55 @@ jobs:
           man = json.load(open("dist/MANIFEST.json"))
           assert man.get("flag_provenance") == "native-asn-recomputed", \
               f"artifact not produced by a native-recompute build: {man.get('flag_provenance')!r}"
-          print("artifact boundary OK: no commercial columns; flags native-ASN-recomputed")
+          # Freshness (audit MEDIUM-4): the S3 sync is non-atomic and this job
+          # runs unattended — refuse to release a stale/partial latest/ bundle.
+          import datetime
+          v = man["version"]
+          try:
+              built = datetime.date.fromisoformat(v)
+          except ValueError:
+              raise SystemExit(f"::error::MANIFEST version {v!r} is not YYYY-MM-DD — refusing to release")
+          age = (datetime.date.today() - built).days
+          if age > 6:
+              raise SystemExit(
+                  f"::error::MANIFEST version {v} is {age} days old — the weekly build did not "
+                  "publish a fresh artifact; refusing to release a stale bundle")
+          if age < 0:
+              raise SystemExit(
+                  f"::error::MANIFEST version {v} is dated {-age} day(s) in the future — "
+                  "clock skew or a hand-edited manifest; refusing to release")
+          # Checksums (audit MEDIUM-5): every manifest-listed file must
+          # hash-match what ships (CSV checksums cover decompressed content).
+          # Coverage first — an empty/partial files map must not pass as "all verified".
+          import hashlib, pathlib
+          REQUIRED = {"ipgeo-community.mmdb", "ipgeo-community.csv"}
+          files = man.get("files") or {}
+          missing_req = REQUIRED - set(files)
+          assert not missing_req, f"manifest omits required data files: {sorted(missing_req)}"
+          def _sha(f):
+              h = hashlib.sha256()
+              for chunk in iter(lambda: f.read(1 << 20), b""):
+                  h.update(chunk)
+              return h.hexdigest()
+          for name, meta in files.items():
+              sha = (meta or {}).get("sha256")
+              assert sha, f"manifest entry for {name} has no sha256"
+              p = pathlib.Path("dist") / name
+              gz = pathlib.Path("dist") / (name + ".gz")
+              # Verify EVERY shipped variant: `gh release create dist/*` publishes
+              # whatever is present, so checking only one of them can ship the other
+              # unverified.
+              checked = 0
+              for path, opener in ((gz, gzip.open), (p, open)):
+                  if not path.exists():
+                      continue
+                  with opener(path, "rb") as f:
+                      got = _sha(f)
+                  assert got == sha, \
+                      f"checksum mismatch for {path.name}: manifest {sha[:12]}… != actual {got[:12]}…"
+                  checked += 1
+              assert checked, f"manifest lists {name} but neither it nor {gz.name} is in dist/"
+          print(f"boundary OK; freshness OK ({v}, {age}d); all {len(files)} manifest entries verified")
           PY
       - name: Cut release
         env:
