@@ -1,0 +1,59 @@
+name: Data correction
+description: An IP/range has wrong geolocation, flags, ip_type, or VPN-list data
+title: "[data] "
+labels: ["data-correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks — corrections make the database better for everyone. Two things first:
+        - Check the [latest weekly release](https://github.com/whois-api-llc/ipgeo-community/releases/latest); data refreshes every Monday.
+        - Read the ["My IP is located wrong"](https://github.com/whois-api-llc/ipgeo-community/blob/main/SUPPORT.md) notes: city/coords are
+          approximate by nature, and VPN/datacenter flags are **range/provider-level by design**.
+        Accepted fixes ship in a future Monday release (no hotfixes; **no SLA**).
+  - type: input
+    id: network
+    attributes:
+      label: IP or CIDR affected
+      placeholder: "203.0.113.0/24"
+    validations:
+      required: true
+  - type: dropdown
+    id: field
+    attributes:
+      label: Which data is wrong?
+      options:
+        - country / region / city / coordinates
+        - timezone or postal_code
+        - asn / as_org
+        - is_vpn / is_proxy / is_datacenter flag
+        - ip_type classification
+        - VPN-list entry (range or provider name)
+        - other
+    validations:
+      required: true
+  - type: input
+    id: release
+    attributes:
+      label: Release version
+      description: "`version` from MANIFEST.json, or the release tag"
+      placeholder: "community-2026.07.27"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you observed vs. what you expected
+      placeholder: "Lookup returns country_code=DE; the range is announced and used in NL."
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: >-
+        Authoritative sources weigh most: RIR registration, an operator-published RFC 8805
+        geofeed (if it's your network, publishing one is the most durable fix), provider
+        documentation. Traceroutes/latency measurements help too.
+    validations:
+      required: false
