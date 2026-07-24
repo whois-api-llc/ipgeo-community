@@ -1,0 +1,41 @@
+name: Bug report
+description: A file won't load/verify, a reader errors, or a release is broken
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For wrong *data* (location, flags, VPN list), use the **Data correction** template instead.
+        Common gotcha first: typed GeoLite2 readers (`geoip2`, `geoip2-golang`) **do not work** with
+        this file — use your language's generic maxminddb `.get()` path (README quick start).
+        Support is best-effort, **no SLA**.
+  - type: input
+    id: artifact
+    attributes:
+      label: File + release
+      placeholder: "ipgeo-community.mmdb, community-2026.07.27"
+    validations:
+      required: true
+  - type: input
+    id: reader
+    attributes:
+      label: Reader / language / version
+      placeholder: "Python maxminddb 2.6.2"
+    validations:
+      required: false
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      placeholder: Include the exact error message.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Commands or a snippet — include the checksum check if the file may be corrupt.
+      render: shell
+    validations:
+      required: false
