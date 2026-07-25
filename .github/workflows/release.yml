@@ -104,6 +104,32 @@ jobs:
           VERSION=$(python3 -c "import json;print(json.load(open('dist/MANIFEST.json'))['version'])")
           TAG="community-${VERSION}"
           if gh release view "$TAG" >/dev/null 2>&1; then echo "release $TAG exists"; exit 0; fi
+
+          # Week-over-week deltas need the PREVIOUS release's MANIFEST. This is
+          # fail-SOFT on purpose: a genuine first release — or an asset we can't
+          # fetch — renders "first release" instead of a delta and must never
+          # block the week's publish.
+          PREV_ARGS=()
+          PREV_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName // empty' 2>/dev/null || true)
+          if [ -n "$PREV_TAG" ] \
+             && gh release download "$PREV_TAG" --pattern MANIFEST.json --dir prev >/dev/null 2>&1; then
+            PREV_ARGS=(--prev prev/MANIFEST.json)
+            echo "rendering week-over-week deltas vs $PREV_TAG"
+          else
+            echo "no previous MANIFEST available — rendering as first release"
+          fi
+
+          # Notes generation is fail-CLOSED: the generator validates every
+          # manifest value against a strict allowlist and exits 1 on any
+          # violation, so a malformed/tampered manifest stops the release
+          # rather than echoing unvetted text onto a public surface.
+          # --vpn-list makes the provider-named share a fresh per-build figure
+          # (GTM §1.5 own-metrics freshness rule) rather than a stale constant.
+          python3 scripts/gen_release_notes.py dist/MANIFEST.json \
+            "${PREV_ARGS[@]}" \
+            --vpn-list dist/community-vpn-list.csv.gz \
+            > release-notes.md
+
           gh release create "$TAG" dist/* \
             --title "ipgeo Community Edition — $VERSION" \
-            --notes "Free IP geolocation DB (CC BY-SA 4.0). See MANIFEST.json for checksums."
+            --notes-file release-notes.md
