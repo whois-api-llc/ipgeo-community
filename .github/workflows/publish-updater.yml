@@ -1,0 +1,89 @@
+name: Publish updater image
+# Builds and publishes the keyless refresh sidecar to GHCR.
+#
+# Keyless by construction: pushes to ghcr.io/<this repo's owner>/… with the
+# built-in GITHUB_TOKEN, so no registry credential is stored anywhere. That is
+# also why the image is built HERE rather than in the private source repo — a
+# repo's GITHUB_TOKEN can only publish under its own owner, and the image's
+# advertised name (and its own image.source label) is whois-api-llc.
+#
+# Docker Hub is deliberately NOT wired: it needs a long-lived account
+# credential that only a human can create and rotate.
+#
+# ONE-TIME HUMAN STEP after the first successful run: a new GHCR package is
+# created PRIVATE regardless of repo visibility. Set the package to Public
+# (Packages -> ipgeo-community-updater -> Package settings -> Change visibility)
+# or every `docker pull` in the README fails with "denied" for anonymous users.
+# Nothing here can flip it — package visibility is not writable by GITHUB_TOKEN.
+#
+# Why not trigger on the weekly release tag: `gh release create` in release.yml
+# runs as GITHUB_TOKEN, and GitHub suppresses workflow triggers for
+# token-attributed events (recursion prevention) — a `push: tags:` trigger here
+# would silently never fire. It would also be pointless: this image does NOT
+# bake in the database, it downloads it at runtime, so its content only changes
+# when the sidecar source does. Hence: publish when the source changes, plus
+# manual dispatch.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docker/community-updater/**"
+      - ".github/workflows/publish-updater.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-updater
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Shellcheck the updater script
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          shellcheck docker/community-updater/update.sh
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/community-updater
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/ipgeo-community-updater:latest
+            ghcr.io/${{ github.repository_owner }}/ipgeo-community-updater:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+          provenance: false
+
+      - name: Smoke-test the published image
+        run: |
+          IMG="ghcr.io/${{ github.repository_owner }}/ipgeo-community-updater:sha-${{ github.sha }}"
+          docker pull "$IMG"
+          # ATTRIBUTION must be baked in — CC BY-SA requires the notice to ship
+          # with the data, and update.sh copies it out of the image at runtime.
+          docker run --rm --entrypoint sh "$IMG" -c 'test -s /opt/ipgeo/ATTRIBUTION.txt'
+          # Keyless: no credential env may be required to run it.
+          docker run --rm --entrypoint sh "$IMG" -c \
+            'grep -qiE "LICENSE_KEY|ACCOUNT_ID|API_KEY|TOKEN" /usr/local/bin/update.sh && exit 1 || exit 0'
+          echo "published $IMG"
