@@ -9,6 +9,21 @@ tier — see the
 describes the company's websites and commercial services. **It does not describe the
 hosted demo below**, which collects considerably less.
 
+## Legal basis and who we are
+
+**Controller:** WhoisXML API. Contact through the channels in the
+[privacy policy](https://main.whoisxmlapi.com/privacy-policy).
+
+**Basis for compiling and publishing this dataset: legitimate interests**
+(GDPR Art. 6(1)(f)) — providing and improving IP address intelligence. This is the same basis
+the other major IP geolocation providers cite for the same activity.
+
+On whether the published file is personal data: it is **block-level**. Every row is a network
+prefix, never an individual address; it carries no names and no per-subscriber records; and the
+coordinates are the centroid of a network block, not the location of a person. Our position is
+that the published file does not identify individuals. We state it here rather than leaving it
+implied.
+
 ## 1. The database
 
 The published database maps **network blocks** to location and infrastructure attributes.
