@@ -12,16 +12,10 @@ release up promptly; the other six days it's a no-op.
 
 ## Compose sidecar
 
-Build it once (the image is tiny and has no build-time dependencies):
-
-```sh
-docker build -t ipgeo-community-updater docker/community-updater/
-```
-
 ```yaml
 services:
   ipgeo-updater:
-    image: ipgeo-community-updater
+    image: ghcr.io/whois-api-llc/ipgeo-community-updater:latest
     volumes:
       - ipgeo-data:/data
     restart: unless-stopped
@@ -38,7 +32,7 @@ volumes:
 ## One-shot / cron mode
 
 ```sh
-docker run --rm -v ipgeo-data:/data -e RUN_ONCE=1 ipgeo-community-updater
+docker run --rm -v ipgeo-data:/data -e RUN_ONCE=1 ghcr.io/whois-api-llc/ipgeo-community-updater
 ```
 
 Exit 0 = up to date or updated; exit 1 = fetch/verify failed (current DB left untouched).
@@ -61,17 +55,12 @@ Exit 0 = up to date or updated; exit 1 = fetch/verify failed (current DB left un
   per-IP precision, daily updates, or confidence scores? That's the commercial
   [WhoisXML / Panavision](https://www.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=container&utm_campaign=community-launch)
   tier.
-- **Build it yourself — there is no published image to pull.** The build is a two-line
-  Dockerfile over `alpine` with no build-time dependencies, so `docker build` takes seconds and
-  gives you a ~23 MB image. The source is right here, which also means you can read exactly what
-  you are running before you run it.
-- **Why no registry image?** The publish workflow
-  ([`publish-updater.yml`](../../.github/workflows/publish-updater.yml)) does build and push to
-  GHCR, keylessly, using the built-in `GITHUB_TOKEN`. But this organisation's package policy
-  permits private packages only, so the pushed image cannot be made public and an anonymous
-  `docker pull` gets `denied`. Rather than document a command that fails for you, the quickstart
-  builds from source. Docker Hub is not published either — that needs a long-lived account
-  credential.
+- **Images:** `ghcr.io/whois-api-llc/ipgeo-community-updater`, tagged `latest` and
+  `sha-<commit>`, for `linux/amd64` and `linux/arm64`. **No login required.** Published by
+  [`publish-updater.yml`](../../.github/workflows/publish-updater.yml) using the built-in
+  `GITHUB_TOKEN`, so no registry credential is stored anywhere. Docker Hub is not published —
+  that would need a long-lived account credential. Prefer to build it yourself?
+  `docker build -t ipgeo-community-updater docker/community-updater/` — the source is right here.
 - The image does **not** contain the database — it downloads it at runtime — so it is rebuilt
   only when this directory changes, not on every weekly data release.
 - `Dockerfile`, `update.sh`, and `ATTRIBUTION.txt` here are kept **byte-identical** to
