@@ -6,8 +6,9 @@ This page states what each one actually does.
 For the company-level relationship — support requests, sales enquiries, the commercial
 tier — see the
 [WhoisXML API privacy policy](https://main.whoisxmlapi.com/privacy-policy). That policy
-describes the company's websites and commercial services. **It does not describe the
-hosted demo below**, which collects considerably less.
+describes the company's websites and commercial services — including the interactive lookup
+at [ip-geolocation.whoisxmlapi.com](https://ip-geolocation.whoisxmlapi.com/). **It does not
+describe the two things below**, which involve considerably less data.
 
 ## Legal basis and who we are
 
@@ -48,10 +49,12 @@ Two things this means in practice:
 Per-IP precision, daily updates, and confidence scores are deliberately **not** in this free
 tier — see the README.
 
-## 2. The hosted demo
+## 2. The demo app
 
-The demo looks up an IP address against the database and shows the result. Its behaviour,
-as implemented:
+**We do not run a hosted instance.** The demo is software you run yourself — so for the demo,
+we hold no data about you at all, because none of it ever reaches us.
+
+For your own users, here is what the app does, as implemented:
 
 |                          |                                                                                                                                                      |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -62,11 +65,10 @@ as implemented:
 | **Third-party requests** | None. The page loads no external scripts, fonts, or images.                                                                                          |
 | **Your own IP**          | If you visit without specifying an address, the page looks up the address your request arrives from, so you see your own result. It is not retained. |
 
-If you would rather not have your own address looked up at all, pass one explicitly —
-`?ip=8.8.8.8` — and yours is never read.
+Visiting without an address makes the app look up the address the request arrives from; passing
+one explicitly — `?ip=8.8.8.8` — means the visitor's own address is never read.
 
-The demo is **self-hostable** — the source is in [`demo/`](demo/) in this repository. Run your
-own copy and nothing touches our infrastructure at all.
+The source is in [`demo/`](demo/) in this repository.
 
 ## Reporting a problem
 
