@@ -38,10 +38,12 @@ Columns `network,provider,basis` — `basis` is `asn`, `x4bnet`, or `cluster`;
 the MIT license (see VPN-ATTRIBUTION.txt, shipped with the release).
 
 **This list, not the MMDB's `is_vpn`, is the VPN surface.** The MMDB flag is an ASN-level
-signal and is deliberately narrower: of the list's 11,922 IPv4 ranges, 4,068 (34.1%) have
-`is_vpn` set on their MMDB record, and of the 2,878 provider-named ranges, 1,465 (50.9%) do.
-**Provider names are not in the MMDB at all.** For VPN detection or provider attribution,
-match against this list; use the MMDB flag only as a coarse hint.
+signal and is deliberately narrower: as of the `2026-07-27` release, of the list's 11,922 IPv4
+ranges (it carries no IPv6 rows), 4,068 (34.1%) have `is_vpn` set on their MMDB record, and of
+the 2,878 provider-named ranges, 1,465 (50.9%) do. **Provider names are not in the MMDB at all.**
+For VPN detection or provider attribution, match against this list; use the MMDB flag only as a
+coarse hint. These shares are re-measured per release — check the current one rather than
+assuming last week's.
 
 The same range can appear under more than one `basis`, so the rows overlap — de-overlap them
 (e.g. `ipaddress.collapse_addresses`) before summing address counts, or you will double-count.

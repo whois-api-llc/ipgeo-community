@@ -147,7 +147,7 @@ def render_notes(
     lines = [
         f"# ipgeo Community Edition — {version}",
         "",
-        "Free IP geolocation database with VPN/proxy/datacenter flags, a",
+        "Free IP geolocation database with VPN and datacenter flags, a",
         "provider-named VPN list, and `ip_type` infrastructure classification.",
         "**CC BY-SA 4.0** · updated **weekly on Mondays** · no signup.",
         "",
@@ -161,7 +161,16 @@ def render_notes(
         pct, _ = vpn_stats
         lines.append(f"- Provider names on **{pct:.1f}%** of the listed IPv4 space (as of release {version})")
     if m["n_columns"]:
-        lines.append(f"- {m['n_columns']} fields incl. `is_vpn` / `is_proxy` / `is_datacenter` / `ip_type`")
+        # The count stays MANIFEST-driven, but the named examples must not imply
+        # data the artifact does not carry: `is_proxy` and `country_name` are in
+        # the schema (and so in this count) yet populated on zero records — the
+        # free edition recomputes its flags from ASN classification and the
+        # proxy-ASN list is empty. Name them as reserved rather than dropping
+        # them, so the count and the enumeration cannot look inconsistent.
+        lines.append(
+            f"- {m['n_columns']} fields incl. `is_vpn` / `is_datacenter` / `ip_type` "
+            "(`is_proxy` and `country_name` are reserved — in the schema, not populated)"
+        )
 
     if m["files"]:
         lines += ["", "## Files", "", "| File | Size | SHA-256 |", "| --- | --- | --- |"]
