@@ -34,6 +34,19 @@ import sys
 
 DEFAULT_COMMERCIAL_URL = "https://ip-geolocation.whoisxmlapi.com/"
 
+# Schema fields that exist in the artifact but carry no value on any record, so
+# the notes must never advertise them as signal. `is_proxy` is empty BY
+# CONSTRUCTION: the community build recomputes the flag from
+# pipeline.sources.vpn_detect.detect_asn, whose PROXY_ASNS is an empty
+# frozenset, so it can only ever come out false (0 / 27,344,365 rows in
+# community-2026-07-27; same scan found country_name at 0 too). Names here are
+# used for MEMBERSHIP against the manifest's column list only — what the render
+# prints is this module's own literals, never manifest-supplied text.
+RESERVED_FIELDS = ("country_name", "is_proxy")
+
+# Populated flag/classification fields, in the order the bullet names them.
+HEADLINE_FIELDS = ("is_vpn", "is_datacenter", "ip_type")
+
 CTA = (
     "Need per-IP VPN precision, daily updates, or confidence scores? "
     "[Commercial tier]({url}?utm_source=ipgeo-community"
@@ -58,11 +71,15 @@ def validate_manifest(manifest: dict) -> dict:
     version = str(manifest.get("version", ""))
     if not _VERSION_RE.match(version):
         raise ValueError(f"manifest version fails the allowlist: {version!r}")
+    columns = [str(c) for c in (manifest.get("columns") or [])]
     out = {
         "version": version,
         "records": int(manifest.get("records") or 0),
         "vpn_list_rows": int(manifest.get("vpn_list_rows") or 0),
-        "n_columns": len(manifest.get("columns") or []),
+        "n_columns": len(columns),
+        # Membership set only — column names are never echoed into the render,
+        # so they need no allowlist and an unusual name cannot break a release.
+        "column_names": frozenset(columns),
         "files": {},
     }
     for name, meta in (manifest.get("files") or {}).items():
@@ -90,19 +107,29 @@ def _delta(cur: int, prev: int | None) -> str:
     return f"{'+' if d >= 0 else ''}{d:,} vs last week"
 
 
+def _union_addresses(nets: list[ipaddress.IPv4Network]) -> int:
+    """Size of the UNION of `nets` in addresses — each address counted once.
+
+    `collapse_addresses` drops networks subsumed by a larger one and merges
+    adjacent siblings; neither changes the union's size, so summing the
+    collapsed result is an exact de-duplicated count.
+    """
+    return sum(n.num_addresses for n in ipaddress.collapse_addresses(nets))
+
+
 def vpn_named_share(path: pathlib.Path) -> tuple[float, int] | None:
     """(provider-named % of listed IPv4 space, total rows) from network,provider,basis CSV.
 
-    Both sides are measured on address space that has been de-overlapped with
-    ipaddress.collapse_addresses first. The same address can be listed under
-    more than one `basis` (`asn`, `x4bnet`, `cluster`), so summing
-    num_addresses row-by-row double-counts it: on the 2026-07-27 release that
-    inflated the denominator by 313,730 addresses (8.86%) and understated the
-    published share as 26.1% where the true, de-overlapped figure is 28.5%.
+    Both sides are de-overlapped before their address counts are summed. The
+    list carries the same address space under more than one `basis` (`asn`,
+    `x4bnet`, `cluster`), so a per-row sum double-counts every overlapping
+    prefix. That inflates the DENOMINATOR far more than the numerator (named
+    ranges do not overlap each other), which understates the published share.
+    Counting each side as a union is the honest figure.
     """
     opener = gzip.open if path.suffix == ".gz" else open
-    all_nets: list[ipaddress.IPv4Network] = []
     named_nets: list[ipaddress.IPv4Network] = []
+    all_nets: list[ipaddress.IPv4Network] = []
     rows = 0
     try:
         with opener(path, "rt", newline="") as f:
@@ -120,8 +147,7 @@ def vpn_named_share(path: pathlib.Path) -> tuple[float, int] | None:
     except OSError as e:
         print(f"note: cannot read vpn list ({e}) — omitting provider-share line", file=sys.stderr)
         return None
-    total = sum(n.num_addresses for n in ipaddress.collapse_addresses(all_nets))
-    named = sum(n.num_addresses for n in ipaddress.collapse_addresses(named_nets))
+    total = _union_addresses(all_nets)
     if total == 0:
         if rows:
             # Rows existed but none parsed — schema drift, not an empty list. Say so.
@@ -131,7 +157,7 @@ def vpn_named_share(path: pathlib.Path) -> tuple[float, int] | None:
                 file=sys.stderr,
             )
         return None
-    return (100.0 * named / total, rows)
+    return (100.0 * _union_addresses(named_nets) / total, rows)
 
 
 def render_notes(
@@ -161,16 +187,18 @@ def render_notes(
         pct, _ = vpn_stats
         lines.append(f"- Provider names on **{pct:.1f}%** of the listed IPv4 space (as of release {version})")
     if m["n_columns"]:
-        # The count stays MANIFEST-driven, but the named examples must not imply
-        # data the artifact does not carry: `is_proxy` and `country_name` are in
-        # the schema (and so in this count) yet populated on zero records — the
-        # free edition recomputes its flags from ASN classification and the
-        # proxy-ASN list is empty. Name them as reserved rather than dropping
-        # them, so the count and the enumeration cannot look inconsistent.
-        lines.append(
-            f"- {m['n_columns']} fields incl. `is_vpn` / `is_datacenter` / `ip_type` "
-            "(`is_proxy` and `country_name` are reserved — in the schema, not populated)"
-        )
+        populated = " / ".join(f"`{f}`" for f in HEADLINE_FIELDS)
+        lines.append(f"- {m['n_columns']} fields incl. {populated}")
+        reserved = [f for f in RESERVED_FIELDS if f in m["column_names"]]
+        if reserved:
+            names = " and ".join(f"`{f}`" for f in reserved)
+            lines.append(
+                f"- {names} are part of the schema but are RESERVED — not populated in this "
+                "release, so treat them as absent rather than as a negative signal"
+                if len(reserved) > 1
+                else f"- {names} is part of the schema but is RESERVED — not populated in this "
+                "release, so treat it as absent rather than as a negative signal"
+            )
 
     if m["files"]:
         lines += ["", "## Files", "", "| File | Size | SHA-256 |", "| --- | --- | --- |"]
