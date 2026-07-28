@@ -18,7 +18,7 @@ per build (the own-metrics freshness rule) and tagged to this release.
 Usage:
   python3 scripts/gen_release_notes.py MANIFEST.json \
       [--prev previous/MANIFEST.json] [--vpn-list community-vpn-list.csv.gz] \
-      [--commercial-url https://www.whoisxmlapi.com/]
+      [--commercial-url https://ip-geolocation.whoisxmlapi.com/]
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ import pathlib
 import re
 import sys
 
-DEFAULT_COMMERCIAL_URL = "https://www.whoisxmlapi.com/"
+DEFAULT_COMMERCIAL_URL = "https://ip-geolocation.whoisxmlapi.com/"
 
 CTA = (
     "Need per-IP VPN precision, daily updates, or confidence scores? "

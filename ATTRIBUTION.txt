@@ -16,4 +16,4 @@ When you use or redistribute it, retain these notices:
 - Geolocation, ip_type classification, VPN/proxy/datacenter flags, and the
   merge/confidence model are © WhoisXML API / ipgeo, released under CC BY-SA 4.0.
 
-CAIDA ITDK and WhoisXML commercial (Panavision) fields are NOT included.
+CAIDA ITDK and WhoisXML API commercial fields are NOT included.

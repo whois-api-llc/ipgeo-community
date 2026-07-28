@@ -27,7 +27,7 @@ import maxminddb
 MMDB_PATH = os.environ.get("IPGEO_MMDB", "ipgeo-community.mmdb")
 PORT = int(os.environ.get("PORT", "8080"))
 UPGRADE_URL = (
-    "https://www.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=demo-tool&utm_campaign=community-launch"
+    "https://ip-geolocation.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=demo-tool&utm_campaign=community-launch"
 )
 
 FIELDS = [
@@ -127,7 +127,7 @@ def render_page(ip: str | None, result: dict | None, error: str | None = None) -
 {f"<table>{rows}</table>" if rows else ""}
 <div class="cta">Need <strong>per-IP (/32) precision, daily updates, or confidence
 scores</strong>? That's the commercial tier:
-<a href="{UPGRADE_URL}">WhoisXML / Panavision</a>. The free database is
+<a href="{UPGRADE_URL}">WhoisXML API IP Geolocation</a>. The free database is
 ASN/network-block granularity, refreshed weekly.</div>
 <footer>Data: <a href="https://github.com/whois-api-llc/ipgeo-community">ipgeo Community
 Edition</a> (CC BY-SA 4.0) — flags are network-level, not a judgment about any

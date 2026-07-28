@@ -2,7 +2,7 @@ name: Publish Release
 # Autonomous: pulls the weekly community artifact from S3 (published by the
 # private topcoder1/ipgeo_core community-build.yml) and cuts a GitHub Release.
 # The publish is SELF-VERIFYING — it refuses to release an artifact that carries
-# any commercial (Panavision) column, so an unattended run cannot leak the
+# any commercial-only column, so an unattended run cannot leak the
 # commercial edge even if the build regresses. (VPN/proxy flags are recomputed
 # from native ASN detection in the build, so no per-row provenance check is
 # needed here — the column check is the provenance-independent invariant.)
