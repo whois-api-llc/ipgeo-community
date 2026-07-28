@@ -18,7 +18,7 @@ per build (the own-metrics freshness rule) and tagged to this release.
 Usage:
   python3 scripts/gen_release_notes.py MANIFEST.json \
       [--prev previous/MANIFEST.json] [--vpn-list community-vpn-list.csv.gz] \
-      [--commercial-url https://www.whoisxmlapi.com/]
+      [--commercial-url https://ip-geolocation.whoisxmlapi.com/]
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ import pathlib
 import re
 import sys
 
-DEFAULT_COMMERCIAL_URL = "https://www.whoisxmlapi.com/"
+DEFAULT_COMMERCIAL_URL = "https://ip-geolocation.whoisxmlapi.com/"
 
 CTA = (
     "Need per-IP VPN precision, daily updates, or confidence scores? "
@@ -91,9 +91,19 @@ def _delta(cur: int, prev: int | None) -> str:
 
 
 def vpn_named_share(path: pathlib.Path) -> tuple[float, int] | None:
-    """(provider-named % of listed IPv4 space, total rows) from network,provider,basis CSV."""
+    """(provider-named % of listed IPv4 space, total rows) from network,provider,basis CSV.
+
+    Both sides are measured on address space that has been de-overlapped with
+    ipaddress.collapse_addresses first. The same address can be listed under
+    more than one `basis` (`asn`, `x4bnet`, `cluster`), so summing
+    num_addresses row-by-row double-counts it: on the 2026-07-27 release that
+    inflated the denominator by 313,730 addresses (8.86%) and understated the
+    published share as 26.1% where the true, de-overlapped figure is 28.5%.
+    """
     opener = gzip.open if path.suffix == ".gz" else open
-    named = total = rows = 0
+    all_nets: list[ipaddress.IPv4Network] = []
+    named_nets: list[ipaddress.IPv4Network] = []
+    rows = 0
     try:
         with opener(path, "rt", newline="") as f:
             for row in csv.DictReader(f):
@@ -104,12 +114,14 @@ def vpn_named_share(path: pathlib.Path) -> tuple[float, int] | None:
                     continue
                 if net.version != 4:
                     continue
-                total += net.num_addresses
+                all_nets.append(net)
                 if (row.get("provider") or "").strip():
-                    named += net.num_addresses
+                    named_nets.append(net)
     except OSError as e:
         print(f"note: cannot read vpn list ({e}) — omitting provider-share line", file=sys.stderr)
         return None
+    total = sum(n.num_addresses for n in ipaddress.collapse_addresses(all_nets))
+    named = sum(n.num_addresses for n in ipaddress.collapse_addresses(named_nets))
     if total == 0:
         if rows:
             # Rows existed but none parsed — schema drift, not an empty list. Say so.

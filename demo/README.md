@@ -2,7 +2,9 @@
 
 A one-file web app that looks any IP up against the free
 [ipgeo Community Edition](https://github.com/whois-api-llc/ipgeo-community) database and
-shows every field — geolocation plus `is_vpn` / `is_proxy` / `is_datacenter` / `ip_type`.
+shows whichever fields the record carries — geolocation plus `is_vpn` / `is_datacenter` /
+`ip_type`. (`is_proxy` and `country_name` are in the schema but reserved and unpopulated in the
+current release, so they never render — see [SCHEMA.md](../SCHEMA.md).)
 Stdlib + `maxminddb`, no framework, no account, no telemetry.
 
 ## Run it
