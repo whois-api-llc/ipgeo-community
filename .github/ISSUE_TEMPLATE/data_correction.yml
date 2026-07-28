@@ -26,7 +26,7 @@ body:
         - country / region / city / coordinates
         - timezone or postal_code
         - asn / as_org
-        - is_vpn / is_proxy / is_datacenter flag
+        - is_vpn / is_datacenter flag
         - ip_type classification
         - VPN-list entry (range or provider name)
         - other

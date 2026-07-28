@@ -53,7 +53,7 @@ Exit 0 = up to date or updated; exit 1 = fetch/verify failed (current DB left un
   `ngx_http_geoip2_module`'s `auto_reload`).
 - The database is **CC BY-SA 4.0** — keep the attribution files with redistributed copies. Need
   per-IP precision, daily updates, or confidence scores? That's the commercial
-  [WhoisXML / Panavision](https://www.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=container&utm_campaign=community-launch)
+  [WhoisXML API IP Geolocation](https://ip-geolocation.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=container&utm_campaign=community-launch)
   tier.
 - **Images:** `ghcr.io/whois-api-llc/ipgeo-community-updater`, tagged `latest` and
   `sha-<commit>`, for `linux/amd64` and `linux/arm64`. **No login required.** Published by

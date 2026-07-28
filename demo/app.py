@@ -2,7 +2,10 @@
 """ipgeo Community Edition — tiny self-hostable IP-lookup demo.
 
 One file, stdlib + maxminddb. Looks any IP up against the free community MMDB
-and shows every field (incl. is_vpn / is_proxy / is_datacenter / ip_type).
+and shows whichever fields the record carries (incl. is_vpn / is_datacenter /
+ip_type). FIELDS below is the full schema, so it also covers the columns that
+are reserved-but-unpopulated today (country_name, is_proxy) — those simply
+never render, because absent fields are skipped.
 
     pip install maxminddb
     IPGEO_MMDB=/path/to/ipgeo-community.mmdb python3 app.py   # http://localhost:8080
@@ -27,7 +30,7 @@ import maxminddb
 MMDB_PATH = os.environ.get("IPGEO_MMDB", "ipgeo-community.mmdb")
 PORT = int(os.environ.get("PORT", "8080"))
 UPGRADE_URL = (
-    "https://www.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=demo-tool&utm_campaign=community-launch"
+    "https://ip-geolocation.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=demo-tool&utm_campaign=community-launch"
 )
 
 FIELDS = [
@@ -117,8 +120,8 @@ def render_page(ip: str | None, result: dict | None, error: str | None = None) -
  .err{{color:#b00020}} footer{{font-size:.8rem;color:#666;margin-top:2rem}}
 </style>
 <h1>ipgeo Community — IP lookup</h1>
-<p>Free weekly IP geolocation with <code>is_vpn</code> / <code>is_proxy</code> /
-<code>is_datacenter</code> flags and <code>ip_type</code>. No signup.</p>
+<p>Free weekly IP geolocation with <code>is_vpn</code> / <code>is_datacenter</code> flags
+and <code>ip_type</code>. No signup.</p>
 <form method="get" action="/">
   <input name="ip" placeholder="8.8.8.8 or 2001:db8::1" value="{html.escape(ip or "")}">
   <button>Look up</button>
@@ -127,7 +130,7 @@ def render_page(ip: str | None, result: dict | None, error: str | None = None) -
 {f"<table>{rows}</table>" if rows else ""}
 <div class="cta">Need <strong>per-IP (/32) precision, daily updates, or confidence
 scores</strong>? That's the commercial tier:
-<a href="{UPGRADE_URL}">WhoisXML / Panavision</a>. The free database is
+<a href="{UPGRADE_URL}">WhoisXML API IP Geolocation</a>. The free database is
 ASN/network-block granularity, refreshed weekly.</div>
 <footer>Data: <a href="https://github.com/whois-api-llc/ipgeo-community">ipgeo Community
 Edition</a> (CC BY-SA 4.0) — flags are network-level, not a judgment about any

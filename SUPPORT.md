@@ -35,7 +35,9 @@ upcoming Monday build, never as a hotfix to an existing release.
 ### About the VPN / datacenter flags
 
 `is_vpn`, `is_proxy`, `is_datacenter`, `ip_type`, and the VPN list are
-**ASN/provider-level classifications by design** in the free edition. A
+**ASN/provider-level classifications by design** in the free edition.
+(`is_proxy` is reserved and **not populated** in the current release, so there
+is nothing to correct on that flag yet — see [SCHEMA.md](SCHEMA.md).) A
 single address inside a provider's flagged range can't be individually
 unflagged at this granularity — corrections apply at the range/provider
 level (wrong provider name, a range that isn't the provider's anymore, a
@@ -44,7 +46,7 @@ mis-typed `ip_type`). Those corrections are welcome via the same template.
 ## Commercial / production needs
 
 Per-IP precision, daily updates, confidence scores, and supported SLAs are
-the commercial tier — [WhoisXML / Panavision](https://www.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=docs&utm_campaign=community-launch&utm_content=support).
+the commercial tier — [WhoisXML API IP Geolocation](https://ip-geolocation.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=docs&utm_campaign=community-launch&utm_content=support).
 Sales and licensing questions belong there, not in the issue tracker.
 
 ## Security
