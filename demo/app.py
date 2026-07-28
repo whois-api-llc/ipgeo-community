@@ -135,9 +135,10 @@ ASN/network-block granularity, refreshed weekly.</div>
 <footer>Data: <a href="https://github.com/whois-api-llc/ipgeo-community">ipgeo Community
 Edition</a> (CC BY-SA 4.0) — flags are network-level, not a judgment about any
 individual. Self-host this page: <code>demo/</code> in the repo.
-<br>Includes <a href="https://db-ip.com">IP Geolocation by DB-IP</a> (CC BY 4.0). ipgeo
-Community Edition uses the IP2Location LITE database for
-<a href="https://www.ip2location.com">IP geolocation</a>.</footer>
+<br>Includes <a href="https://db-ip.com">IP Geolocation by DB-IP</a> (CC BY 4.0).
+ipgeo Community Edition uses the IP2Location LITE database for
+<a href="https://www.ip2location.com">IP geolocation</a>, under IP2Location's
+<a href="https://lite.ip2location.com/data-license">Terms of Use</a>.</footer>
 """
 
 

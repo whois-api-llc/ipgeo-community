@@ -1,22 +1,46 @@
 # ipgeo Community Edition
 
 A **free, no-signup** IP geolocation database (MMDB + CSV). What makes it different from other free
-databases: it's the only free **download** that bundles city geolocation **with the VPN provider's
-name** behind an IP, plus a datacenter flag and an infrastructure **`ip_type`** classification.
+databases: it bundles city geolocation **with the VPN provider's name** behind an IP, plus a
+datacenter flag and an infrastructure **`ip_type`** classification.
 
 |  | GeoLite2 | DB-IP Lite | IP2Location LITE | X4BNet lists_vpn | **ipgeo Community** |
 |---|:--:|:--:|:--:|:--:|:--:|
 | City + ASN geolocation | ✔ | ✔ | ✔ | ✘ | **✔** |
 | VPN flags | ✘ (paid) | ✘ | ✘ ¹ | ✔ | **✔** |
-| VPN **provider names** | ✘ | ✘ | ✘ | ✘ | **✔ (where known)** |
-| Infrastructure `ip_type` | ✘ | ✘ | ✘ | ✘ | **✔** |
+| VPN **provider names** | ✘ | ✘ | ✘ ¹ | ✘ ² | **✔ (where known)** |
+| Infrastructure `ip_type` | ✘ | ✘ | partial ³ | partial ⁴ | **✔** |
 | No account required | ✘ | ✔ | ✘ | ✔ | **✔** |
-| License | EULA | CC BY 4.0 | Terms of Use ² | MIT | CC BY-SA 4.0 |
+| License | EULA | CC BY 4.0 | Terms of Use ⁵ | MIT ⁶ | CC BY-SA 4.0 |
 
-¹ IP2Location's free *proxy* list (IP2Proxy LITE) is open-proxy only and ships **zero VPN records**.
+Every cell was re-checked against the vendor's own pages on **2026-07-28**; the footnotes quote them
+so you can verify rather than take our word for it.
 
-² IP2Location applies no Creative Commons licence to IP2Location LITE; it ships under their own
-[Terms of Use](https://lite.ip2location.com/data-license).
+¹ IP2Location LITE's geolocation files carry no VPN or proxy field. Their free *proxy* database,
+IP2Proxy LITE, is a separate download, and IP2Location states it "*is limited to public proxy (PUB)
+IP addresses*", directing users to the commercial edition "*for IP addresses of VPN, web proxies,
+Tor exits, data centers (DCH) and search engine robots (SES)*" — [PX11 LITE product
+page](https://lite.ip2location.com/database/px11-ip-proxytype-country-region-city-isp-domain-usagetype-asn-lastseen-threat-residential-provider),
+2,664,950 IPv4 rows. That schema does define a `provider` column ("*Name of VPN provider if
+available*"); we have not downloaded the file to see whether it is populated, since that needs an
+account.
+
+² X4BNet's *published* lists are unlabelled CIDRs, so the distributed data carries no provider
+names — but the same repository does publish provider attribution in its **input** files
+(`input/vpn/ASN.txt` maps ASNs to named providers; `input/vpn/ips/` holds per-provider files).
+
+³ IP2Proxy LITE carries a 12-value usage-type classification —
+`(COM)(ORG)(GOV)(MIL)(EDU)(LIB)(CDN)(ISP)(MOB)(DCH)(SES)(RSV)` — but only across its ~2.66M
+open-proxy records; the IP2Location LITE geolocation files themselves carry no such field.
+
+⁴ X4BNet ships a separate datacenter list (`output/datacenter/ipv4.txt` — 42,552 CIDRs on
+2026-07-28); it does not classify CDN, mobile carrier, satellite, education or government.
+
+⁵ IP2Location applies no Creative Commons licence to IP2Location LITE; it ships under the licensor's
+own [Terms of Use](https://lite.ip2location.com/data-license), which require attribution.
+
+⁶ MIT, granted in the repository README's prose — there is no `LICENSE` file in
+[X4BNet/lists_vpn](https://github.com/X4BNet/lists_vpn) and GitHub reports no licence for it.
 
 ## Download
 
@@ -113,6 +137,6 @@ products.
 
 ---
 *Trademarks: MaxMind and GeoLite2 are trademarks of MaxMind, Inc.; IP2Location and IP2Proxy are
-trademarks of Hexasoft Online Sdn Bhd; DB-IP is a trademark of its operator; X4BNet/lists_vpn and
-IPtoASN are the marks of their respective owners. This project is independent of, and not affiliated
-with or endorsed by, any of them.*
+trademarks of Hexasoft Development Sdn Bhd; DB-IP is a trademark of its operator; X4BNet/lists_vpn
+and IPtoASN are the marks of their respective owners. This project is independent of, and not
+affiliated with or endorsed by, any of them.*
