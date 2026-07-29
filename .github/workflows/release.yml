@@ -47,6 +47,38 @@ jobs:
           man = json.load(open("dist/MANIFEST.json"))
           assert man.get("flag_provenance") == "native-asn-recomputed", \
               f"artifact not produced by a native-recompute build: {man.get('flag_provenance')!r}"
+          # Source exclusions. flag_provenance above covers how the VPN/proxy/
+          # datacenter FLAGS were derived; it says nothing about which
+          # geolocation SOURCES fed the merge. Both matter, and only the first
+          # was checked here — which is how community-2026-07-27 published
+          # CAIDA ITDK-derived answers on 617/617 discriminating test IPs while
+          # its own ATTRIBUTION.txt stated they were not included.
+          #
+          # Sources whose licence grants us no right to redistribute. Mirrored
+          # from VERIFIED_EXCLUDED_FROM_BUILD in the private repo's
+          # scripts/build_community_edition.py, and deliberately asserted
+          # INDEPENDENTLY rather than trusted: this is the last gate before a
+          # public artifact, so it should fail on its own knowledge, not on the
+          # producer's say-so. Subset check, so the producer may exclude MORE
+          # than this without breaking the release; it may not exclude less.
+          #
+          # CAIDA ITDK — the Public AUA (https://www.caida.org/about/legal/aua/
+          # public_aua/) grants a "non-transferable" licence to "copy, modify,
+          # and use the data", not to distribute it, and adds "there are no
+          # implied licenses in this Agreement".
+          REQUIRED_EXCLUSIONS = {"caida_itdk"}
+          excluded = man.get("excluded_sources")
+          assert isinstance(excluded, list), (
+              "MANIFEST.json has no excluded_sources list — this artifact predates "
+              "the source-exclusion guarantee, or was built by a pipeline that does "
+              "not enforce it. Refusing to publish."
+          )
+          missing_excl = REQUIRED_EXCLUSIONS - set(excluded)
+          assert not missing_excl, (
+              f"artifact was NOT built with required source exclusions: {sorted(missing_excl)} "
+              f"(manifest declares excluded_sources={sorted(excluded)}). Refusing to publish "
+              "data we hold no redistribution right to."
+          )
           # Freshness (audit MEDIUM-4): the S3 sync is non-atomic and this job
           # runs unattended — refuse to release a stale/partial latest/ bundle.
           import datetime
