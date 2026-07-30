@@ -11,9 +11,12 @@ name** behind an IP, plus a datacenter flag and an infrastructure **`ip_type`** 
 | VPN **provider names** | ✘ | ✘ | ✘ | ✘ | **✔ (where known)** |
 | Infrastructure `ip_type` | ✘ | ✘ | ✘ | ✘ | **✔** |
 | No account required | ✘ | ✔ | ✘ | ✔ | **✔** |
-| License | EULA | CC BY 4.0 | CC BY-SA 4.0 | MIT | CC BY-SA 4.0 |
+| License | EULA | CC BY 4.0 | Custom terms ² | MIT | CC BY-SA 4.0 |
 
 ¹ IP2Location's free *proxy* list (IP2Proxy LITE) is open-proxy only and ships **zero VPN records**.
+
+² IP2Location LITE is distributed under [IP2Location's own Terms of Use](https://lite.ip2location.com/data-license),
+which name no Creative Commons licence.
 
 ## Download
 

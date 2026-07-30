@@ -66,7 +66,18 @@ jobs:
           # public_aua/) grants a "non-transferable" licence to "copy, modify,
           # and use the data", not to distribute it, and adds "there are no
           # implied licenses in this Agreement".
-          REQUIRED_EXCLUSIONS = {"caida_itdk"}
+          #
+          # IP2Location LITE — https://lite.ip2location.com/data-license names no
+          # Creative Commons licence at all; it is headed "Terms of Use" and
+          # closes "All Rights Reserved". Clause 2 ("You are not permitted to
+          # redistribute or resell this product") contradicts clause 5, the
+          # published list skips clause 4 entirely, and their FAQ states "Third
+          # party database repository is not allowed" — which is exactly what a
+          # GitHub Release of a standalone database is. The conservative reading
+          # governs: no onward redistribution right, so it may not ship here.
+          # Added 2026-07-30 — this gate had drifted behind the producer, which
+          # is precisely the failure mode it exists to catch.
+          REQUIRED_EXCLUSIONS = {"caida_itdk", "ip2location_lite"}
           excluded = man.get("excluded_sources")
           assert isinstance(excluded, list), (
               "MANIFEST.json has no excluded_sources list — this artifact predates "

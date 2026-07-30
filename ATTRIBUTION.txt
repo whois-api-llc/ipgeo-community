@@ -3,17 +3,13 @@ ipgeo Community Edition — Attribution
 This database is a merged derivative of public and openly-licensed sources.
 When you use or redistribute it, retain these notices:
 
-- Includes IP2Location LITE data (CC BY-SA 4.0), available from
-  https://lite.ip2location.com — "This site or product includes IP2Location
-  LITE data available from https://lite.ip2location.com."
 - Includes DB-IP Lite data (CC BY 4.0), available from https://db-ip.com —
   "IP Geolocation by DB-IP" (https://db-ip.com).
-- ASN data derived from IPtoASN (public domain), https://iptoasn.com
-- The community VPN list's ASN/provider clusters are ipgeo/WhoisXML-derived
-  (© WhoisXML API), released here under CC BY-SA 4.0. Rows with basis=x4bnet
-  additionally incorporate X4BNet/lists_vpn under the MIT license — the full
-  MIT notice is in VPN-ATTRIBUTION.txt (shipped alongside the VPN list).
+- ASN data derived from IPtoASN, licensed under Public Domain (PDDL v1.0)
+  (https://opendatacommons.org/licenses/pddl/1.0/) — https://iptoasn.com
+- Community VPN list rows with basis=x4bnet are derived from X4BNet/lists_vpn
+  (MIT, https://github.com/X4BNet/lists_vpn) — see VPN-ATTRIBUTION.txt.
 - Geolocation, ip_type classification, VPN/proxy/datacenter flags, and the
-  merge/confidence model are © WhoisXML API / ipgeo, released under CC BY-SA 4.0.
+  merge model are © WhoisXML API / ipgeo, released here under CC BY-SA 4.0.
 
-CAIDA ITDK and WhoisXML API commercial fields are NOT included.
+CAIDA ITDK and WhoisXML commercial fields are NOT included.
