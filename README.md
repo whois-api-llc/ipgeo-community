@@ -113,6 +113,6 @@ products.
 
 ---
 *Trademarks: MaxMind and GeoLite2 are trademarks of MaxMind, Inc.; IP2Location and IP2Proxy are
-trademarks of Hexasoft Online Sdn Bhd; DB-IP is a trademark of its operator; X4BNet/lists_vpn and
+trademarks of Hexasoft Development Sdn. Bhd.; DB-IP is a trademark of its operator; X4BNet/lists_vpn and
 IPtoASN are the marks of their respective owners. This project is independent of, and not affiliated
 with or endorsed by, any of them.*
