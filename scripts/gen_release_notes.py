@@ -47,6 +47,21 @@ RESERVED_FIELDS = ("country_name", "is_proxy")
 # Populated flag/classification fields, in the order the bullet names them.
 HEADLINE_FIELDS = ("is_vpn", "is_datacenter", "ip_type")
 
+# How the shipped `timezone` column was derived. Stamped into the manifest at
+# the point the column is filled (scripts/write_community_base_manifest.py, in
+# the same pipeline step as the merge) and carried forward verbatim by
+# build_community_edition.py. It decides whether the Attribution section below
+# claims an ODbL obligation.
+#
+# It cannot be read from IPGEO_ENABLE_ODBL_TIMEZONE here: this file is VENDORED
+# into whois-api-llc/ipgeo-community and executed by its release.yml against a
+# downloaded MANIFEST.json — a different repo, workflow and machine from the
+# build, where the flag is structurally absent. Reading it would answer "no
+# ODbL" for an ODbL build too, dropping the notice from the one release that
+# needs it. So the answer travels with the artifact instead.
+TZ_CURATED = "curated-region-table"  # curated country/region tables — ODbL-free
+TZ_ODBL = "odbl-coordinate-lookup"  # timezonefinder coords — ODbL applies
+
 CTA = (
     "Need per-IP VPN precision, daily updates, or confidence scores? "
     "[Commercial tier]({url}?utm_source=ipgeo-community"
@@ -82,6 +97,18 @@ def validate_manifest(manifest: dict) -> dict:
         "column_names": frozenset(columns),
         "files": {},
     }
+    # Resolved to a bool here, so the render can only ever print this module's
+    # own literals — the manifest's provenance string never reaches the output.
+    tz = manifest.get("timezone_provenance")
+    if tz is None:
+        # Predates the stamp: this artifact cannot prove it is ODbL-free, so it
+        # keeps the notice. Over-disclosing costs a reader some needless
+        # diligence; under-disclosing is a licence exposure (cf. #221).
+        out["timezone_odbl"] = True
+    elif str(tz) in (TZ_CURATED, TZ_ODBL):
+        out["timezone_odbl"] = str(tz) == TZ_ODBL
+    else:
+        raise ValueError(f"manifest timezone_provenance fails the allowlist: {tz!r}")
     for name, meta in (manifest.get("files") or {}).items():
         if not _FILENAME_RE.match(str(name)):
             raise ValueError(f"file name fails the allowlist: {name!r}")
@@ -218,10 +245,27 @@ def render_notes(
         "X4BNet lists_vpn (MIT), and IPtoASN",
         "([PDDL v1.0](https://opendatacommons.org/licenses/pddl/1.0/)) data.",
         "",
-        "The `timezone` field is derived from timezonefinder, whose boundary data",
-        "comes from OpenStreetMap via evansiroky/timezone-boundary-builder:",
-        "© OpenStreetMap contributors, available under the",
-        "[Open Database License (ODbL) v1.0](https://opendatacommons.org/licenses/odbl/1.0/).",
+    ]
+    lines += (
+        [
+            "The `timezone` field is derived from timezonefinder, whose boundary data",
+            "comes from OpenStreetMap via evansiroky/timezone-boundary-builder:",
+            "© OpenStreetMap contributors, available under the",
+            "[Open Database License (ODbL) v1.0](https://opendatacommons.org/licenses/odbl/1.0/).",
+        ]
+        if m["timezone_odbl"]
+        else [
+            # Descriptive, not exclusive. An "and nothing else feeds it" claim
+            # would contradict the ATTRIBUTION.txt shipped in the same bundle,
+            # which still carries the timezonefinder/ODbL notice unconditionally
+            # (build_community_edition.py REQUIRED_ATTRIBUTION). Conditioning
+            # that notice is the follow-up; until it lands, the release notes say
+            # what the field IS and leave the licence document to state terms.
+            "The `timezone` field is derived from curated country and first-level-region",
+            "tables authored in this project.",
+        ]
+    )
+    lines += [
         "",
         "Keep `ATTRIBUTION.txt` and `VPN-ATTRIBUTION.txt` alongside redistributed",
         "copies.",
