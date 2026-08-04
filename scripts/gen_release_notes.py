@@ -255,12 +255,13 @@ def render_notes(
         ]
         if m["timezone_odbl"]
         else [
-            # Descriptive, not exclusive. An "and nothing else feeds it" claim
-            # would contradict the ATTRIBUTION.txt shipped in the same bundle,
-            # which still carries the timezonefinder/ODbL notice unconditionally
-            # (build_community_edition.py REQUIRED_ATTRIBUTION). Conditioning
-            # that notice is the follow-up; until it lands, the release notes say
-            # what the field IS and leave the licence document to state terms.
+            # Descriptive, not exclusive — the licence document states terms,
+            # these notes say what the field IS. The ATTRIBUTION.txt shipped in
+            # the same bundle is now conditioned on this same
+            # `timezone_provenance` and carries the matching curated bullet
+            # (build_community_edition.attribution_text), so the two surfaces of
+            # a release agree; keeping the wording descriptive is what stops a
+            # paraphrase on either side from quietly reintroducing a mismatch.
             "The `timezone` field is derived from curated country and first-level-region",
             "tables authored in this project.",
         ]
