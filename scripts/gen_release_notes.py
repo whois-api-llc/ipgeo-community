@@ -39,10 +39,16 @@ DEFAULT_COMMERCIAL_URL = "https://ip-geolocation.whoisxmlapi.com/"
 # CONSTRUCTION: the community build recomputes the flag from
 # pipeline.sources.vpn_detect.detect_asn, whose PROXY_ASNS is an empty
 # frozenset, so it can only ever come out false (0 / 27,344,365 rows in
-# community-2026-07-27; same scan found country_name at 0 too). Names here are
-# used for MEMBERSHIP against the manifest's column list only — what the render
-# prints is this module's own literals, never manifest-supplied text.
-RESERVED_FIELDS = ("country_name", "is_proxy")
+# community-2026-07-27). Names here are used for MEMBERSHIP against the
+# manifest's column list only — what the render prints is this module's own
+# literals, never manifest-supplied text.
+#
+# `country_name` was in this tuple until the enrichment that fills it landed.
+# The same scan measured it at 0 too, but that was a MISSING DERIVATION rather
+# than an empty source list: it is now derived from country_code, so calling it
+# reserved would tell downloaders to ignore a populated column. `is_proxy` stays
+# — its emptiness is structural until PROXY_ASNS is populated.
+RESERVED_FIELDS = ("is_proxy",)
 
 # Populated flag/classification fields, in the order the bullet names them.
 HEADLINE_FIELDS = ("is_vpn", "is_datacenter", "ip_type")

@@ -1,19 +1,26 @@
 # ipgeo Community Edition
 
-A **free, no-signup** IP geolocation database (MMDB + CSV). What makes it different from other free
-databases: it's the only free **download** that bundles city geolocation **with the VPN provider's
-name** behind an IP, plus a datacenter flag and an infrastructure **`ip_type`** classification.
+A **free, no-signup** IP geolocation database (MMDB + CSV). It bundles city geolocation with the
+VPN provider's name behind an IP — across the whole address space rather than only open-proxy
+ranges — plus a datacenter flag and an infrastructure **`ip_type`** classification.
 
 |  | GeoLite2 | DB-IP Lite | IP2Location LITE | X4BNet lists_vpn | **ipgeo Community** |
 |---|:--:|:--:|:--:|:--:|:--:|
 | City + ASN geolocation | ✔ | ✔ | ✔ | ✘ | **✔** |
 | VPN flags | ✘ (paid) | ✘ | ✘ ¹ | ✔ | **✔** |
-| VPN **provider names** | ✘ | ✘ | ✘ | ✘ | **✔ (where known)** |
+| VPN **provider names** | ✘ | ✘ | ✔ ¹ | ✘ | **✔ (where known)** |
 | Infrastructure `ip_type` | ✘ | ✘ | ✘ | ✘ | **✔** |
 | No account required | ✘ | ✔ | ✘ | ✔ | **✔** |
 | License | EULA | CC BY 4.0 | Custom terms ² | MIT | CC BY-SA 4.0 |
 
-¹ IP2Location's free *proxy* list (IP2Proxy LITE) is open-proxy only and ships **zero VPN records**.
+¹ Corrected 2026-08-05. IP2Location's free *proxy* list (IP2Proxy LITE) is labelled open-proxy only,
+and every record in the free PX11 file is indeed `proxy_type = PUB` — but it does **not** ship zero VPN
+records, as this note previously claimed. Measured on the free PX11 CSV (2,673,876 rows, downloaded
+2026-08-05): `provider` is populated on 25,963 rows, 25,836 of which also carry `city_name`, and 8,100
+name consumer VPN brands (ExpressVPN, NordVPN, ProtonVPN, Windscribe, IPVanish and others). By that
+measure it names more provider-attributed VPN ranges than this database's 2,917. Our difference is
+coverage — 16.7M ranges of city geolocation against IP2Proxy's 2.67M open-proxy ranges — not
+exclusivity.
 
 ² IP2Location LITE is distributed under [IP2Location's own Terms of Use](https://lite.ip2location.com/data-license),
 which name no Creative Commons licence.
