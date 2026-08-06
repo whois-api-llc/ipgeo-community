@@ -40,24 +40,33 @@ Grab the latest [Release](../../releases/latest):
 `timezone`, `asn`, `as_org`, `is_vpn`, `is_proxy`, `is_datacenter`, `ip_type`
 (`datacenter` / `cdn` / `mobile_carrier` / `satellite` / `education` / `government`).
 A field is **absent** when unknown — coverage varies by field, so check before you build on one.
-Two columns are part of the schema but **reserved — they carry no data in the current release**:
+One column is **reserved — it carries no data in any release**:
 
 - **`is_proxy` — reserved, never set.** The free edition derives its flags from ASN
   classification and its proxy-ASN list is empty, so this flag is not populated in any record.
-- **`country_name` — reserved, not populated.** Derive it from `country_code`.
 
-Per-field coverage, measured over all 27,344,365 records of the `2026-07-27` release:
-`country_code` 99.9% · `timezone` 99.8% · `city` 97.5% · `region` 97.1% · `latitude`/`longitude`
-95.3% · `asn` 80.6% · `as_org` 80.5% · `ip_type` 9.9% · `is_datacenter` 8.5% ·
-**`postal_code` 0.9%** · `is_vpn` 0.03% · `is_proxy` 0% · `country_name` 0%.
+And one is in transition:
 
-`timezone` is **not always an IANA name**: 45.5% of records carry one (`America/New_York`) and
-54.3% carry a bare UTC offset (`+10:00`). Test for `/` before handing the value to a tz library.
+- **`country_name`** — empty up to and including the `2026-08-03` release; populated with the
+  English name derived from `country_code` in releases built after 2026-08-05. For older
+  downloads, derive it from `country_code` yourself.
+
+Per-field coverage, measured over all 16,712,543 records of the `2026-08-03` release:
+`country_code` 99.9% · `timezone` 99.9% · `city` 96.6% · `region` 95.9% · `asn` 92.3% ·
+`as_org` 92.3% · `latitude`/`longitude` 91.2% · `ip_type` 5.8% · `is_datacenter` 3.9% ·
+**`postal_code` 1.1%** · `is_vpn` 0.05% · `is_proxy` 0% · `country_name` 0%.
+These numbers move week to week (single-address records were dropped and a second ASN source was
+added since `2026-07-27`), so treat the release notes on each Release as the per-release truth.
+
+`timezone` is an **IANA name** (`America/New_York`) on every populated record — measured 100.0%
+on the `2026-08-03` release. Releases up to `2026-07-31` mixed in bare UTC offsets (`+10:00`,
+54.3% of values at the time) from a coordinate-based deriver that was removed on 2026-07-31; if
+you still parse those older files, keep testing for `/` before handing the value to a tz library.
 
 **VPN detection belongs to `community-vpn-list.csv`, not to the MMDB's `is_vpn`.** The list is the
-authoritative VPN surface — 11,922 ranges (all IPv4; the list carries no IPv6 rows), and it is the
+authoritative VPN surface — 11,721 ranges (all IPv4; the list carries no IPv6 rows), and it is the
 only place **provider names** exist. The MMDB flag is a narrower ASN-level subset: as of the
-`2026-07-27` release it is set on 4,068 of those 11,922 ranges (34.1%), so reading `is_vpn` alone
+`2026-08-03` release it is set on 3,892 of those 11,721 ranges (33.2%), so reading `is_vpn` alone
 under-detects and can never give you a provider name.
 
 Full reference: [SCHEMA.md](SCHEMA.md).
@@ -76,7 +85,7 @@ reader = maxminddb.open_database("ipgeo-community.mmdb")
 rec = reader.get("2.56.190.1")       # use .get() — this is not a typed geoip2 City database
 print(rec["country_code"], rec.get("city"), rec.get("is_vpn"))
 
-# VPN + provider name → community-vpn-list.csv (11,922 IPv4 ranges; no IPv6 rows).
+# VPN + provider name → community-vpn-list.csv (11,721 IPv4 ranges; no IPv6 rows).
 with gzip.open("community-vpn-list.csv.gz", "rt", newline="") as f:
     vpn_ranges = [(ipaddress.ip_network(r["network"]), r["provider"], r["basis"])
                   for r in csv.DictReader(f)]
@@ -89,7 +98,7 @@ print(vpn_lookup("2.56.190.1"))
 print(vpn_lookup("2606:4700:4700::1111"))
 ```
 
-Actual output against the `2026-07-27` release:
+Actual output against the `2026-08-03` release:
 
 ```
 US Dallas None
@@ -103,7 +112,7 @@ nothing, since the list is IPv4-only.
 
 The MMDB works with any maxminddb reader (Python `maxminddb`, Go `oschwald/maxminddb-golang`,
 Node `maxmind`) via the generic `.get()` — same file format as GeoLite2, with our own documented
-fields. The linear scan above is fine for 11,922 ranges; for high-volume lookups load them into a
+fields. The linear scan above is fine for ~12k ranges; for high-volume lookups load them into a
 prefix trie instead.
 
 ## License
