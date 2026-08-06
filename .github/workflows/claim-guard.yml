@@ -1,0 +1,45 @@
+name: Claim Guard
+# Blocks a marketing superlative that was measured FALSE on 2026-08-05.
+#
+# README.md claimed this was "the only free download that bundles city
+# geolocation with the VPN provider's name", and a footnote said IP2Proxy LITE
+# "ships zero VPN records". The free IP2Proxy LITE PX11 file carries `provider`
+# alongside `city_name` on 25,836 ranges, 8,100 of them consumer VPN brands,
+# against this database's 2,917. Both claims were corrected in #21.
+#
+# The claim lived on the front page for a week and nothing caught it, because
+# nothing here checks prose. This is that check.
+#
+# Runs on pull_request AND push so a direct commit to main — how a README
+# usually gets edited — cannot slip past a PR-only gate.
+#
+# The logic is in scripts/check_claims.py, not inline here, for the reason this
+# repo's upstream learned the hard way: logic written as YAML is unreachable by
+# tests. That script self-tests on every run and refuses to report success if
+# its own detector has stopped detecting.
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "scripts/check_claims.py"
+      - ".github/workflows/claim-guard.yml"
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - "scripts/check_claims.py"
+      - ".github/workflows/claim-guard.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  claims:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Check for unverified uniqueness claims
+        run: python3 scripts/check_claims.py
