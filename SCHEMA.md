@@ -50,5 +50,4 @@ The same range can appear under more than one `basis`, so the rows overlap — d
 
 ## Not included (commercial WhoisXML API products only)
 
-Per-IP (/32) precision, confidence scores, `observed_*` fields, suspect classes,
-and daily cadence.
+Per-IP (/32) precision, `observed_*` fields, suspect classes, and daily cadence.

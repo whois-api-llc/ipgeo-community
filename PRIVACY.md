@@ -46,7 +46,7 @@ Two things this means in practice:
   operated as VPN infrastructure. It is not a judgement about anyone using an address in
   that range.
 
-Per-IP precision, daily updates, and confidence scores are deliberately **not** in this free
+Per-IP precision and daily updates are deliberately **not** in this free
 tier — see the README.
 
 ## 2. The demo app

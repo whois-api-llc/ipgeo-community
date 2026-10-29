@@ -2,4 +2,4 @@ blank_issues_enabled: true
 contact_links:
   - name: Commercial / per-IP precision / SLA
     url: https://ip-geolocation.whoisxmlapi.com/
-    about: Sales, licensing, and production-support questions for the commercial tier (per-IP VPN precision, daily updates, confidence scores).
+    about: Sales, licensing, and production-support questions for the commercial tier (per-IP VPN precision, daily updates).
