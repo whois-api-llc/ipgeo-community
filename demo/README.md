@@ -39,6 +39,6 @@ the sidecar swaps in a new file — no restart needed.
   connection limit.
 - Fields are **absent when unknown** — the page says so instead of inventing blanks.
 - Flags are **ASN/network-block granularity** (the free tier's design): a flagged range
-  describes infrastructure, not a judgment about an individual address. Per-IP precision,
-  daily updates, and confidence scores are the commercial tier (CTA in the page footer).
+  describes infrastructure, not a judgment about an individual address. Per-IP precision
+  and daily updates are the commercial tier (CTA in the page footer).
 - Database license: **CC BY-SA 4.0** — keep `ATTRIBUTION.txt` with redistributed copies.

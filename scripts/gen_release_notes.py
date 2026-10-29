@@ -69,7 +69,7 @@ TZ_CURATED = "curated-region-table"  # curated country/region tables — ODbL-fr
 TZ_ODBL = "odbl-coordinate-lookup"  # timezonefinder coords — ODbL applies
 
 CTA = (
-    "Need per-IP VPN precision, daily updates, or confidence scores? "
+    "Need per-IP VPN precision or daily updates? "
     "[Commercial tier]({url}?utm_source=ipgeo-community"
     "&utm_medium=release-notes&utm_campaign=community-launch&utm_content={version})."
 )

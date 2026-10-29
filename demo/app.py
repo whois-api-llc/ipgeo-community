@@ -128,8 +128,8 @@ and <code>ip_type</code>. No signup.</p>
 </form>
 {f'<p class="err">{html.escape(error)}</p>' if error else ""}
 {f"<table>{rows}</table>" if rows else ""}
-<div class="cta">Need <strong>per-IP (/32) precision, daily updates, or confidence
-scores</strong>? That's the commercial tier:
+<div class="cta">Need <strong>per-IP (/32) precision or daily updates</strong>?
+That's the commercial tier:
 <a href="{UPGRADE_URL}">WhoisXML API IP Geolocation</a>. The free database is
 ASN/network-block granularity, refreshed weekly.</div>
 <footer>Data: <a href="https://github.com/whois-api-llc/ipgeo-community">ipgeo Community

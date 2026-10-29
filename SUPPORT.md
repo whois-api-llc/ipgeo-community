@@ -45,7 +45,7 @@ mis-typed `ip_type`). Those corrections are welcome via the same template.
 
 ## Commercial / production needs
 
-Per-IP precision, daily updates, confidence scores, and supported SLAs are
+Per-IP precision, daily updates, and supported SLAs are
 the commercial tier — [WhoisXML API IP Geolocation](https://ip-geolocation.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=docs&utm_campaign=community-launch&utm_content=support).
 Sales and licensing questions belong there, not in the issue tracker.
 
@@ -86,9 +86,8 @@ datacenter space. `ip_type` adds the finer class (`datacenter`, `cdn`,
 
 **How is the free VPN list different from the paid data?**
 The free list is aggregated at ASN/provider level with provider names where
-known. The commercial products add per-IP precision, daily cadence, and
-confidence scoring. The free tier is honest about that boundary — it's why
-it exists.
+known. The commercial products add per-IP precision and daily cadence. The
+free tier is honest about that boundary — it's why it exists.
 
 **Which file should I use?**
 `ipgeo-community.mmdb` for lookups in applications; the CSVs for SQL or

@@ -123,7 +123,7 @@ attribution notices and share derivatives alike. Updated weekly.
 ## Free vs. commercial
 
 The free edition uses **ASN / network-block** granularity, native flags, and a weekly cadence. Need
-**per-IP (/32) precision, daily updates, or confidence scores**? Those are the commercial
+**per-IP (/32) precision or daily updates**? Those are the commercial
 [WhoisXML API IP Geolocation](https://ip-geolocation.whoisxmlapi.com/?utm_source=ipgeo-community&utm_medium=readme&utm_campaign=community-launch)
 products.
 
