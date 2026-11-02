@@ -32,7 +32,8 @@ Every row is a CIDR prefix — `1.2.3.0/24` — not an individual address, and t
 fields are:
 
 `network`, `country_code`, `country_name`, `region`, `city`, `postal_code`, `latitude`,
-`longitude`, `timezone`, `asn`, `as_org`, `is_vpn`, `is_proxy`, `is_datacenter`, `ip_type`
+`longitude`, `timezone`, `asn`, `as_org`, `is_vpn`, `is_proxy`, `is_datacenter`, `ip_type`,
+`sanctioned_region`
 
 There are **no names, no subscriber records, no per-person data, and no per-IP records** of
 any kind. `as_org` is the network operator — a company, not a person.

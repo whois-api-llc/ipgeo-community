@@ -21,11 +21,15 @@ when unknown.
 | `is_proxy`      | bool    | **0%**      | **Reserved, not populated in the current release** — the free edition's proxy-ASN list is empty, so the flag is never set on any record |
 | `is_datacenter` | bool    | 8.49%       | true when the ASN is datacenter / hosting   |
 | `ip_type`       | string  | 9.86%       | datacenter / cdn / mobile_carrier / satellite / education / government |
+| `sanctioned_region` | bool | 0.002% ² | true for networks placed in Crimea or Sevastopol by region or coordinates, which are coded `country_code` UA; absent elsewhere. A network located only by its city name, or not at all, carries no flag, so its absence does not prove a network is elsewhere. It does not mark the occupied parts of the Donetsk, Luhansk, Zaporizhzhia or Kherson oblasts |
 
 ¹ Share of the 27,344,365 records in the `2026-07-27` release carrying a non-empty value for
 the field. Coverage moves between weekly releases; the two rows marked **reserved** are
 structural, not a coverage dip — they stay in the schema and in `MANIFEST.json`'s `columns`
 so readers keep a stable column order, but nothing populates them today.
+
+² `sanctioned_region` is new in the `2026-11-02` release: 344 of the 16,552,600 records in its CSV
+carry it.
 
 The boolean flags are **true-only**: they are present exactly when set, and absent otherwise —
 no record carries an explicit `false`. Read them with `rec.get("is_datacenter")` and treat a
