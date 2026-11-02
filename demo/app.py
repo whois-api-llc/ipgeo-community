@@ -48,6 +48,7 @@ FIELDS = [
     "is_proxy",
     "is_datacenter",
     "ip_type",
+    "sanctioned_region",
 ]
 
 _reader = None

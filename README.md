@@ -38,7 +38,8 @@ Grab the latest [Release](../../releases/latest):
 
 `country_code`, `country_name`, `region`, `city`, `postal_code`, `latitude`, `longitude`,
 `timezone`, `asn`, `as_org`, `is_vpn`, `is_proxy`, `is_datacenter`, `ip_type`
-(`datacenter` / `cdn` / `mobile_carrier` / `satellite` / `education` / `government`).
+(`datacenter` / `cdn` / `mobile_carrier` / `satellite` / `education` / `government`),
+`sanctioned_region` (true on networks in Crimea and Sevastopol; new in the `2026-11-02` release).
 A field is **absent** when unknown — coverage varies by field, so check before you build on one.
 One column is **reserved — it carries no data in any release**:
 
