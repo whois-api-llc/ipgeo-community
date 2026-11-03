@@ -3,9 +3,9 @@
 
 One file, stdlib + maxminddb. Looks any IP up against the free community MMDB
 and shows whichever fields the record carries (incl. is_vpn / is_datacenter /
-ip_type). FIELDS below is the full schema, so it also covers the columns that
-are reserved-but-unpopulated today (country_name, is_proxy) — those simply
-never render, because absent fields are skipped.
+ip_type). FIELDS below is the full schema, so it also covers the column that
+is reserved-but-unpopulated today (is_proxy) — it simply never renders,
+because absent fields are skipped.
 
     pip install maxminddb
     IPGEO_MMDB=/path/to/ipgeo-community.mmdb python3 app.py   # http://localhost:8080
