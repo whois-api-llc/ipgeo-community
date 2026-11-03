@@ -18,7 +18,7 @@ and every record in the free PX11 file is indeed `proxy_type = PUB` — but it d
 records, as this note previously claimed. Measured on the free PX11 CSV (2,673,876 rows, downloaded
 2026-08-05): `provider` is populated on 25,963 rows, 25,836 of which also carry `city_name`, and 8,100
 name consumer VPN brands (ExpressVPN, NordVPN, ProtonVPN, Windscribe, IPVanish and others). By that
-measure it names more provider-attributed VPN ranges than this database's 2,917. Our difference is
+measure it names more provider-attributed VPN ranges than this database's 2,917 (as of 2026-08-05). Our difference is
 coverage — 16.7M ranges of city geolocation against IP2Proxy's 2.67M open-proxy ranges — not
 exclusivity.
 
@@ -46,29 +46,29 @@ One column is **reserved — it carries no data in any release**:
 - **`is_proxy` — reserved, never set.** The free edition derives its flags from ASN
   classification and its proxy-ASN list is empty, so this flag is not populated in any record.
 
-And one is in transition:
+And one was empty in the first release:
 
-- **`country_name`** — empty up to and including the `2026-08-03` release; populated with the
-  English name derived from `country_code` in releases built after 2026-08-05. For older
-  downloads, derive it from `country_code` yourself.
+- **`country_name`** — empty in the `2026-08-03` release; populated with the English name
+  derived from `country_code` in releases built after 2026-08-05. For that first download,
+  derive it from `country_code` yourself.
 
-Per-field coverage, measured over all 16,712,543 records of the `2026-08-03` release:
-`country_code` 99.9% · `timezone` 99.9% · `city` 96.6% · `region` 95.9% · `asn` 92.3% ·
-`as_org` 92.3% · `latitude`/`longitude` 91.2% · `ip_type` 5.8% · `is_datacenter` 3.9% ·
-**`postal_code` 1.1%** · `is_vpn` 0.05% · `is_proxy` 0% · `country_name` 0%.
-These numbers move week to week (single-address records were dropped and a second ASN source was
-added since `2026-07-27`), so treat the release notes on each Release as the per-release truth.
+Per-field coverage, measured over all 16,552,600 records (CSV rows) of the `2026-11-02` release:
+`country_code` 99.99% · `country_name` 99.99% · `timezone` 99.93% · `city` 94.7% · `region` 93.4% ·
+`asn` 92.4% · `as_org` 92.4% · `latitude`/`longitude` 88.6% · `ip_type` 6.4% · `is_datacenter` 4.0% ·
+**`postal_code` 1.1%** · `is_vpn` 0.05% · `sanctioned_region` 0.002% · `is_proxy` 0%.
+These numbers move week to week, and the release notes do not restate them, so measure the release
+you download before you build on a field.
 
 `timezone` is an **IANA name** (`America/New_York`) on every populated record — measured 100.0%
-on the `2026-08-03` release. Releases up to `2026-07-31` mixed in bare UTC offsets (`+10:00`,
+on the `2026-08-03` and `2026-11-02` releases. Releases up to `2026-07-31` mixed in bare UTC offsets (`+10:00`,
 54.3% of values at the time) from a coordinate-based deriver that was removed on 2026-07-31; if
 you still parse those older files, keep testing for `/` before handing the value to a tz library.
 
 **VPN detection belongs to `community-vpn-list.csv`, not to the MMDB's `is_vpn`.** The list is the
-authoritative VPN surface — 11,721 ranges (all IPv4; the list carries no IPv6 rows), and it is the
+authoritative VPN surface — 11,786 ranges (all IPv4; the list carries no IPv6 rows), and it is the
 only place **provider names** exist. The MMDB flag is a narrower ASN-level subset: as of the
-`2026-08-03` release it is set on 3,892 of those 11,721 ranges (33.2%), so reading `is_vpn` alone
-under-detects and can never give you a provider name.
+`2026-11-02` release it is set on 4,063 of those 11,786 ranges (34.5%, looking up each range's first
+address), so reading `is_vpn` alone under-detects and can never give you a provider name.
 
 Full reference: [SCHEMA.md](SCHEMA.md).
 
@@ -86,7 +86,7 @@ reader = maxminddb.open_database("ipgeo-community.mmdb")
 rec = reader.get("2.56.190.1")       # use .get() — this is not a typed geoip2 City database
 print(rec["country_code"], rec.get("city"), rec.get("is_vpn"))
 
-# VPN + provider name → community-vpn-list.csv (11,721 IPv4 ranges; no IPv6 rows).
+# VPN + provider name → community-vpn-list.csv (IPv4 ranges only; no IPv6 rows).
 with gzip.open("community-vpn-list.csv.gz", "rt", newline="") as f:
     vpn_ranges = [(ipaddress.ip_network(r["network"]), r["provider"], r["basis"])
                   for r in csv.DictReader(f)]
@@ -99,7 +99,7 @@ print(vpn_lookup("2.56.190.1"))
 print(vpn_lookup("2606:4700:4700::1111"))
 ```
 
-Actual output against the `2026-08-03` release:
+Actual output against the `2026-11-02` release (the same as on `2026-08-03`):
 
 ```
 US Dallas None
