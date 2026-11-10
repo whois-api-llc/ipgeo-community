@@ -21,7 +21,7 @@ when unknown.
 | `is_proxy`      | bool    | **0%**      | **Reserved, not populated in the current release** — the free edition's proxy-ASN list is empty, so the flag is never set on any record |
 | `is_datacenter` | bool    | 4.00%       | true when the ASN is datacenter / hosting   |
 | `ip_type`       | string  | 6.40%       | datacenter / cdn / mobile_carrier / satellite / education / government |
-| `sanctioned_region` | bool | 0.002% ² | true for networks placed in Crimea or Sevastopol by region or coordinates, which are coded `country_code` UA; absent elsewhere. A network located only by its city name, or not at all, carries no flag, so its absence does not prove a network is elsewhere. It does not mark the occupied parts of the Donetsk, Luhansk, Zaporizhzhia or Kherson oblasts |
+| `sanctioned_region` | bool | 0.002% ² | true for networks placed in Crimea or Sevastopol by region or coordinates, and for networks with no region or coordinates of their own whose nearest enclosing network with either is one of them; all are coded `country_code` UA; absent elsewhere. Any other network located only by its city name, or not at all, carries no flag, so its absence does not prove a network is elsewhere. It does not mark the occupied parts of the Donetsk, Luhansk, Zaporizhzhia or Kherson oblasts |
 
 ¹ Share of the 16,552,600 records (rows of the CSV) in the `2026-11-02` release carrying a
 non-empty value for the field. The MMDB resolves overlapping rows into fewer records, so its
